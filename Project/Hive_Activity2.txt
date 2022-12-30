@@ -1,0 +1,77 @@
+root@b4e800607403:/# vim hivescript2.sql
+root@b4e800607403:/# cat hivescript2.sql
+
+-- CREATE TABLE WITH EPISODEIV SCRIPT
+CREATE TABLE episodeIV2 (name STRING, line STRING)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+TBLPROPERTIES("skip.header.line.count"="2");
+
+-- LOAD EPISODEIV SCRIPT TO THE TABLE
+LOAD DATA LOCAL INPATH 'episodeIV_dialouges.txt' INTO TABLE episodeIV2;
+
+-- COUNT LUKE IN EACH INE
+INSERT OVERWRITE DIRECTORY '/user/root/Output2/'
+SELECT COUNT(*) FROM episodeIV2 WHERE INSTR(line, 'Luke') >= 1;
+
+root@b4e800607403:/# hive -f hivescript2.sql
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/usr/local/apache-hive-3.1.2-bin/lib/log4j-slf4j-impl-2.10.0.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/local/hadoop-3.3.1/share/hadoop/common/lib/slf4j-log4j12-1.7.30.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Hive Session ID = d3cc6ae2-7b10-493b-b3d4-2edff329fcef
+
+Logging initialized using configuration in jar:file:/usr/local/apache-hive-3.1.2-bin/lib/hive-common-3.1.2.jar!/hive-log4j2.properties Async: true
+Hive Session ID = fa4c3550-c9ec-4279-a72a-4b52b3c18b97
+OK
+Time taken: 2.32 seconds
+Loading data to table default.episodeiv2
+OK
+Time taken: 0.931 seconds
+Query ID = root_20221230082840_6d6d1def-58bd-4f49-a416-88f72b05ac96
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1672376400552_0008, Tracking URL = http://b4e800607403:8088/proxy/application_1672376400552_0008/
+Kill Command = /usr/local/hadoop/bin/mapred job  -kill job_1672376400552_0008
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2022-12-30 08:28:53,675 Stage-1 map = 0%,  reduce = 0%
+2022-12-30 08:29:00,041 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.2 sec
+2022-12-30 08:29:06,292 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 9.35 sec
+MapReduce Total cumulative CPU time: 9 seconds 350 msec
+Ended Job = job_1672376400552_0008
+Moving data to directory /user/root/Output2
+MapReduce Jobs Launched:
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 9.35 sec   HDFS Read: 81512 HDFS Write: 3 SUCCESS
+Total MapReduce CPU Time Spent: 9 seconds 350 msec
+OK
+Time taken: 28.327 seconds
+
+root@b4e800607403:/# hdfs dfs -ls
+Found 12 items
+drwxr-xr-x   - root supergroup          0 2022-12-30 08:22 Output1
+drwxr-xr-x   - root supergroup          0 2022-12-30 08:29 Output2
+-rw-r--r--   1 root supergroup      67671 2022-12-30 08:13 episodeIV_dialouges.txt
+-rw-r--r--   1 root supergroup      43658 2022-12-30 08:13 episodeVI_dialouges.txt
+-rw-r--r--   1 root supergroup      49891 2022-12-30 08:13 episodeV_dialouges.txt
+-rw-r--r--   1 root supergroup         22 2022-12-30 05:11 file01.txt
+drwxr-xr-x   - root supergroup          0 2021-08-23 10:44 input
+drwxr-xr-x   - root supergroup          0 2022-12-30 08:16 result5
+drwxr-xr-x   - root supergroup          0 2022-12-30 05:13 results
+-rw-r--r--   1 root supergroup        852 2022-12-30 05:20 sales.csv
+drwxr-xr-x   - root supergroup          0 2022-12-30 05:26 salesOutput
+drwxr-xr-x   - root supergroup          0 2022-12-30 05:03 textData
+
+root@b4e800607403:/# hdfs dfs -ls Output2
+Found 1 items
+-rw-r--r--   1 root supergroup          3 2022-12-30 08:29 Output2/000000_0
+
+root@b4e800607403:/# hdfs dfs -cat Output2/000000_0
+56
+root@b4e800607403:/#
